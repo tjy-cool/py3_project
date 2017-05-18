@@ -1,0 +1,11 @@
+{
+    "password": "hao123",
+    "status": 0,
+    "id": "abc",
+    "enroll_date": "2017-05-16",
+    "credit": 15000,
+    "balance": 15000,
+    "last_login_time": "2017-05-16 10:51:08",
+    "pay_day": 22,
+    "expire_date": "2027-05-16"
+}
