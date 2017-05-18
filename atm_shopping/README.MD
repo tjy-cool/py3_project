@@ -34,12 +34,12 @@
         已有账号：user(passwd)，  tom(asdf) ,   jack(asdf)等
 ---
 - 注：
-- 1. ATM的用户登陆和用户日志模块都用了装饰器，分别在my/atm/atm/core/login.py 和 my_atm/atm/core/logger.py文件中
+- 1. ATM的用户登陆和用户日志模块都用了装饰器，分别在atm_project/atm/atm/core/login.py 和 atm_project/atm/core/logger.py文件中
 - 2. 整个程序一般都可以按 q 结束整个程序，包括输入密码阶段
 
 ## 程序结构
 ```
-my_atm
+atm_project
 ├── atm   #信用卡相关操作的程序
 │   ├── bin #主程序
 │   │   ├── atm.py              #信用卡使用操作，用户操作
