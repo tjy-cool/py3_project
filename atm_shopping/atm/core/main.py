@@ -7,42 +7,14 @@ from core import logger
 from core import data_handler
 from core import transaction
 import os,time
-ac_log = {}
-tr_log = {}
+# ac_log = {}
+# tr_log = {}
 
+# 用户数据，存在内存中
 user_data = {
     'account_id':None,
     'is_authenticated':False,
 }
-
-def example():
-    ac_log = {}
-    tr_log = {}
-
-    ac_log['tjy'] = logger.set_ac_logger('tjy')
-    ac_log['hao'] = logger.set_ac_logger('hao')
-    ac_log['tjy'] = logger.set_ac_logger('tjy')
-    ac_log['tjy'] = logger.set_ac_logger('tjy')
-    ac_log['tjy'] = logger.set_ac_logger('tjy')
-    ac_log['tjy'] = logger.set_ac_logger('tjy')
-
-    tr_log['tjy'] = logger.set_tr_logger('tjy')
-    tr_log['hao'] = logger.set_tr_logger('hao')
-
-    ac_log_obj = logger.set_ac_logger('tjy')
-
-    ac_log_obj.info('23')
-    ac_log['tjy'].info('%(name)s ')
-    ac_log['tjy'].info('2')
-    ac_log['tjy'].info('3')
-    ac_log['hao'].info('1')
-    ac_log['hao'].info('2')
-
-    tr_log['tjy'].info('1')
-    tr_log['tjy'].info('2')
-    tr_log['tjy'].info('3')
-    tr_log['hao'].info('1')
-    tr_log['hao'].info('2')
 
 @login.login_acquired
 def account_info(acc_data):

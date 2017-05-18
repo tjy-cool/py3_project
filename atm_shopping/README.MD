@@ -33,8 +33,8 @@
     同时，还实现了简单的购物车进行商品选购，然后登陆信用卡进行付款，并将购买商品记录在atm的用户信息日志中
         已有账号：user(passwd)，  tom(asdf) ,   jack(asdf)等
 ---
-- 注：
-- 1. ATM的用户登陆和用户日志模块都用了装饰器，分别在atm_project/atm/atm/core/login.py 和 atm_project/atm/core/logger.py文件中
+注：
+- 1. ATM的用户登陆和用户日志模块都用了装饰器，分别在[atm_project/atm/core/main.py](https://github.com/tjy-cool/py3_project/blob/master/atm_shopping/atm/core/main.py) 和 [atm_project/atm/core/logger.py](https://github.com/tjy-cool/py3_project/blob/master/atm_shopping/atm/core/logger.py)文件中
 - 2. 整个程序一般都可以按 q 结束整个程序，包括输入密码阶段
 
 ## 程序结构
