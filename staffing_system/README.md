@@ -34,7 +34,8 @@ where后面的判断条件可以为以下几种：
         3. age判断，同id判断，如age >=22
         4. phone判断，程序同id判断，但是输入等号符合实际情况，如phone=13434545667
         5. dept判断，同name，如dept="IT"
-        6. enroll_data判断， 可以为 enroll_date like "2013"， 也可以输入年和月，格式为：year-month-day如enroll_date like "2013-10-10"
+        6. enroll_data判断， 可以为 enroll_date like "2013"， 
+            也可以输入年和月，格式为：year-month-day如enroll_date like "2013-10-10"
     高级功能：
         可以使用【and, or, not】连接以上任意两个条件，如age >= 20 and dept="IT"
 
