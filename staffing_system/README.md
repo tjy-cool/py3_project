@@ -40,7 +40,6 @@ where后面的判断条件可以为以下几种：
         可以使用【and, or, not】连接以上任意两个条件，如age >= 20 and dept="IT"
 
 select显示说明：
-
     select后面的显示可以为一个或多个的组合或全部（*），以逗号连接，中间不能有空格，如 id,name,age 或id,dept,enroll_date
 
 数据说明：
