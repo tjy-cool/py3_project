@@ -10,6 +10,11 @@ MD5校验工具用MD5算法根据下载的文件数据算出来一个校验字�
 - 程序功能：实现对多个文件进行MD5,SHA1和CRC32校验。
 ---
 #### 功能说明：
+本工具是基于wxpython做的界面的,需要安装wxpython，在终端中输入以下安装命令：
+```
+pip3 install wxpython
+```
+
 界面如下图所示：
 
 ![MD5_Hash](MD5_Hash_1.jpg)
