@@ -19,7 +19,7 @@ import binascii
 class MD5_Hash_Frame(wx.Frame):
     def __init__(self, parent):
         # wx.Frame.__init__(self, parent, -1, "MD5-Hash tools V1.0", size=(600,400))
-        super(MD5_Hash_Frame, self).__init__(parent, -1, "MD5-Hash tools V1.0", size=(600,420))
+        super(MD5_Hash_Frame, self).__init__(parent, -1, "MD5-Hash tools V1.0  --by tengjuyuan ", size=(600,420))
         panel = wx.Panel(self)
         self.setupMenuBar(panel)
         self.Show(True)
@@ -36,9 +36,9 @@ class MD5_Hash_Frame(wx.Frame):
         # 创建选择盒子
         self.version_box = wx.CheckBox(parent, -1, u"版本(V)", (500,280))
         self.time_box = wx.CheckBox(parent, -1, u"时间(D)", (500, 280+20))
-        self.md5_box = wx.CheckBox(parent, -1, u"MD5", (500, 280+20*2))
-        self.sha1_box = wx.CheckBox(parent, -1, u"SHA1", (500, 280+20*3))
-        self.crc32_box = wx.CheckBox(parent, -1, u"CRC32", (500, 280+20*4))
+        self.md5_box = wx.CheckBox(parent, -1, u"MD5(M)", (500, 280+20*2))
+        self.sha1_box = wx.CheckBox(parent, -1, u"SHA1(H)", (500, 280+20*3))
+        self.crc32_box = wx.CheckBox(parent, -1, u"CRC32(R)", (500, 280+20*4))
         # 创建进度条
         self.static1 = wx.StaticText(parent, -1, '文件',pos=(20,320),size=(50,25))
         self.static2 = wx.StaticText(parent, -1, '总计',pos=(20,350),size=(50,25))
