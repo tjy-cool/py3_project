@@ -20,7 +20,7 @@ pip3 install wxpython
 ![MD5_Hash](MD5_Hash_1.jpg)
 
 功能有：
-    
+
     1、只支持常用的MD5、SHA1、CRC32算法；
     2、支持多个文件或文件夹拖放操作；
     3、支持停止、重新开始计算操作；
