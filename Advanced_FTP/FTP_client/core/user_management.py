@@ -16,7 +16,7 @@ class FTP_User_management(object):
         self.log_obj = log_obj
 
     def run(self):
-        username = input('username：')
+        username = input('username: ')
         passwd = input('passwd: ')
         if username == 'admin' and passwd == 'admin':
             user_dict = {
