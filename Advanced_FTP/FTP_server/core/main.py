@@ -3,7 +3,7 @@
 # Filename:
 
 
-import socketserver
+import socketserver, re
 import json, hashlib, os
 from conf import settings
 
@@ -154,10 +154,36 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
         self.no_change_cmd(I_cmd)
 
     def cd(self, I_cmd):
-        current_abs_path = user_data_base_dir + I_cmd['re_dir']     # 当前绝对目录
+        os.chdir(user_data_base_dir + I_cmd['re_dir'])
+        current_abs_path = os.popen('pwd').read()     # 当前绝对目录
+        print('current_abs_path: ', current_abs_path)   
+        cmd_dict = {
+            'func': I_cmd['func'],
+            'res_len': 0,
+            'path': I_cmd['re_dir'],
+            'run_successfully': True
+        }
 
-
-        pass
+        try:
+            os.chdir(I_cmd['func'].split(' ')[1])  
+            after_change_abs_path = os.popen('pwd').read().strip()
+            list1 = re.split(user_data_base_dir, after_change_abs_path)
+            if len(list1) == 1:     #试图访问其他向上无权限的文件夹
+                cmd_dict['run_successfully'] = False
+                cmd_dict['path'] = self.user_data['user_name']  # 直接回到用户根目录
+            elif len(list1) == 2:   # 有访问权限
+                cmd_dict['run_successfully'] = True
+                cmd_dict['path'] = list1[1].strip('/')
+            print('after_change_abs_path: ', after_change_abs_path)
+        except FileNotFoundError as e:      # 输入的目录不正确
+            print('Error')
+            cmd_dict['run_successfully'] = False
+        self.request.send(self.get_json(cmd_dict).encode('utf-8'))
+        print(cmd_dict)
+        comfirm_info = self.request.recv(1024).decode()
+        if comfirm_info == 'Ready to recv':
+            print('\033[32;1m%s done...\033[0m' % I_cmd['func'])
+    
 
     def no_change_cmd(self, I_cmd):
         os.chdir(user_data_base_dir + I_cmd['re_dir'])

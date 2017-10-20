@@ -110,10 +110,11 @@ class FTP_Client(object):
         res_dict = json.loads(res)
         if res_dict['run_successfully'] == True:
             self.client.send(b'Ready to recv')
-            res = self.recv_bytes(res_dict['res_len'])
+#            res = self.recv_bytes(res_dict['res_len'])
             print(res)
             return res_dict['path']
         else :
+            self.client.send(b'Error')
             return cmd_dict['re_dir']
 
 
