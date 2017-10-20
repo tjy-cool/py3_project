@@ -163,7 +163,7 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
             'path': I_cmd['re_dir'],
             'run_successfully': True
         }
-        if len(I_cmd['func'].split(' '))==1 and I_cmd['func'].split(' ')[1] == '~':    # 只有cd命令，不带参数； 或者是返回家目录的参数
+        if len(I_cmd['func'].split(' '))==1 or I_cmd['func'].split(' ')[1] == '~':    # 只有cd命令，不带参数； 或者是返回家目录的参数
             cmd_dict['run_successfully'] = True
             cmd_dict['path'] = self.loads_from_json(self.user_data)['user_name']  # 直接回到用户根目录
 
