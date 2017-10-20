@@ -96,6 +96,27 @@ class FTP_Client(object):
         '''日历'''
         return self.no_change_cmd(cmd_dict)
 
+    def cat(self, cmd_dict):
+        '''cat'''
+        return self.no_change_cmd(cmd_dict)
+
+    def more(self, cmd_dict):
+        '''more'''
+        return self.no_change_cmd(cmd_dict)
+
+    def cd(self, cmd_dict):
+        self.client.send(self.get_json(cmd_dict).encode('utf-8'))  # 发送dict的json格式数据到服务器
+        res = self.client.recv(1024).decode()
+        res_dict = json.loads(res)
+        if res_dict['run_successfully'] == True:
+            self.client.send(b'Ready to recv')
+            res = self.recv_bytes(res_dict['res_len'])
+            print(res)
+            return res_dict['path']
+        else :
+            return cmd_dict['re_dir']
+
+
     def no_change_cmd(self, cmd_dict):
         self.client.send(self.get_json(cmd_dict).encode('utf-8'))  # 发送dict的json格式数据到服务器
         res = self.client.recv(1024).decode()

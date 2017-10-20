@@ -92,7 +92,9 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
             with open(user_info_dir+user_name+'.json', 'w', encoding='utf-8') as f:
                 json.dump(Recv_dict, f, indent=4)   # 先删除 'func'的键值
             os.chdir(user_data_base_dir)
-            print(os.popen('md %s'%user_name).read())   # 在linux中为mkdir
+            print(os.popen('mkdir %s'%user_name).read())   # 在linux中为mkdir, windows中为md
+            os.chdir(user_data_base_dir + user_name)    # 切换到用户路径下
+            os.popen('touch %s.log' % user_name)
             self.request.send(b'OK')
 
     def del_user(self, I_cmd):
@@ -128,6 +130,11 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
         self.no_change_cmd(I_cmd)
 
     def tree(self, I_cmd):
+        '''
+        tree 显示目录树
+        :param I_cmd:
+        :return:
+        '''
         self.no_change_cmd(I_cmd)
 
     def date(self, I_cmd):
@@ -137,6 +144,20 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
     def cal(self, I_cmd):
         '''日历'''
         self.no_change_cmd(I_cmd)
+
+    def cat(self, I_cmd):
+        '''cat'''
+        self.no_change_cmd(I_cmd)
+
+    def more(self, I_cmd):
+        '''more'''
+        self.no_change_cmd(I_cmd)
+
+    def cd(self, I_cmd):
+        current_abs_path = user_data_base_dir + I_cmd['re_dir']     # 当前绝对目录
+
+
+        pass
 
     def no_change_cmd(self, I_cmd):
         os.chdir(user_data_base_dir + I_cmd['re_dir'])
@@ -152,7 +173,7 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
         comfirm_info = self.request.recv(1024).decode()
         if comfirm_info == 'Ready to recv':
             self.request.send(res_bytes)
-            print('ls done...')
+            print('\033[32;1m%s done...\033[0m' % I_cmd['func'])
 
     def get_md5(self, src_str):
         '''

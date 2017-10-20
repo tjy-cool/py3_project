@@ -5,6 +5,7 @@
 import socket, json, os, time, sys, getpass, hashlib
 from conf import settings
 from core import logger
+user_data_base_dir = settings.BASE_DIR+'/db'+'/home/'
 
 class FTP_User_management(object):
     def __init__(self, HOST, PORT, log_obj):
@@ -66,10 +67,8 @@ class FTP_User_management(object):
         }
         '''
         self.client.send(self.get_json(add_dict).encode('utf-8'))
-        print('after send')
 
         res = self.client.recv(1024).decode()
-        print('after recv')
         if res == 'OK':
             self.log_obj.info('Add user [%s] successful!' % user_name)
         elif res == 'EXIST':
