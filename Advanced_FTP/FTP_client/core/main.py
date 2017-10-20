@@ -111,10 +111,19 @@ class FTP_Client(object):
         if res_dict['run_successfully'] == True:
             self.client.send(b'Ready to recv')
 #            res = self.recv_bytes(res_dict['res_len'])
-            print(res)
+#             print(res)
+            return res_dict['path']
+        elif res_dict['run_successfully'] =='Dir False':
+            self.client.send(b'Ready to recv')
+            print('超出权限，返回家目录。。。')
+            return res_dict['path']
+        elif res_dict['run_successfully'] =='extent of authority':
+            self.client.send(b'Ready to recv')
+            print('超出权限，返回家目录。。。')
             return res_dict['path']
         else :
             self.client.send(b'Error')
+            print('错误的目录')
             return cmd_dict['re_dir']
 
 

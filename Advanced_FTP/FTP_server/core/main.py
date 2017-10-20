@@ -163,21 +163,29 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
             'path': I_cmd['re_dir'],
             'run_successfully': True
         }
+        if len(I_cmd['func'].split(' '))==1 and I_cmd['func'].split(' ')[1] == '~':    # 只有cd命令，不带参数； 或者是返回家目录的参数
+            cmd_dict['run_successfully'] = True
+            cmd_dict['path'] = self.loads_from_json(self.user_data)['user_name']  # 直接回到用户根目录
 
-        try:
-            os.chdir(I_cmd['func'].split(' ')[1])  
-            after_change_abs_path = os.popen('pwd').read().strip()
-            list1 = re.split(user_data_base_dir, after_change_abs_path)
-            if len(list1) == 1:     #试图访问其他向上无权限的文件夹
+        elif I_cmd['func'].split(' ')[1] == '/':        # 试图访问根目录
+            cmd_dict['run_successfully'] = 'extent of authority'
+            cmd_dict['path'] = self.loads_from_json(self.user_data)['user_name']  # 直接回到用户根目录
+
+        else:
+            try:
+                os.chdir(I_cmd['func'].split(' ')[1])
+                after_change_abs_path = os.popen('pwd').read().strip()
+                list1 = re.split(user_data_base_dir, after_change_abs_path)
+                if len(list1) == 1:     #试图访问其他向上无权限的文件夹
+                    cmd_dict['run_successfully'] = 'Dir False'
+                    cmd_dict['path'] = self.loads_from_json(self.user_data)['user_name']  # 直接回到用户家目录
+                elif len(list1) == 2:   # 有访问权限
+                    cmd_dict['run_successfully'] = True
+                    cmd_dict['path'] = list1[1].strip('/')
+                print('after_change_abs_path: ', after_change_abs_path)
+            except FileNotFoundError as e:      # 输入的目录不正确
+                print('Error')
                 cmd_dict['run_successfully'] = False
-                cmd_dict['path'] = self.user_data['user_name']  # 直接回到用户根目录
-            elif len(list1) == 2:   # 有访问权限
-                cmd_dict['run_successfully'] = True
-                cmd_dict['path'] = list1[1].strip('/')
-            print('after_change_abs_path: ', after_change_abs_path)
-        except FileNotFoundError as e:      # 输入的目录不正确
-            print('Error')
-            cmd_dict['run_successfully'] = False
         self.request.send(self.get_json(cmd_dict).encode('utf-8'))
         print(cmd_dict)
         comfirm_info = self.request.recv(1024).decode()
