@@ -311,7 +311,7 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
             recv_info_file.close()
             f.close()
             send_from_client_md5 = self.request.recv(1024).decode()
-            if recv_file_md5 == send_from_client_md5:
+            if recv_file_md5.hexdigest() == send_from_client_md5:
                 self.request.send(b'File recved completely')
             else:
                 self.request.send(b'File recved uncompletely')

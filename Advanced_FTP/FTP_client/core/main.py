@@ -160,7 +160,7 @@ class FTP_Client(object):
                 elif comfirm == 'Ready to recv':
                     self.send_file(cmd_dict)
                     res_comfirm = self.client.recv(1024).decode()
-                    print(res_comfirm)
+                    print('\n' + res_comfirm)
                     return cmd_dict['re_dir']
 
     def pull(self, I_cmd):
