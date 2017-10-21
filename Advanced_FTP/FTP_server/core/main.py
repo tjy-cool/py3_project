@@ -172,6 +172,10 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
         '''more'''
         self.no_change_cmd(I_cmd)
 
+    def rm(self, I_cmd):
+        '''rm 删除'''
+        self.no_change_cmd(I_cmd)
+
     def cd(self, I_cmd):
         os.chdir(user_data_base_dir + I_cmd['re_dir'])
         current_abs_path = os.popen('pwd').read()     # 当前绝对目录

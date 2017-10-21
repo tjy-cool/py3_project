@@ -103,6 +103,10 @@ class FTP_Client(object):
         '''more'''
         return self.no_change_cmd(cmd_dict)
 
+    def rm(self, cmd_dict):
+        '''rm '''
+        return self.no_change_cmd(cmd_dict)
+
     def cd(self, cmd_dict):
         self.client.send(self.get_json(cmd_dict).encode('utf-8'))  # 发送dict的json格式数据到服务器
         res = self.client.recv(1024).decode()
