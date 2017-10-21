@@ -124,20 +124,19 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
         self.no_change_cmd(I_cmd)
 
     def pwd(self, I_cmd):
-        ''' pwd 显示当前文件夹的目录绝对目录 ''''
-
+        ''' pwd 显示当前文件夹的目录绝对目录 '''
         os.chdir(user_data_base_dir + I_cmd['re_dir'])
         current_abs_path = os.popen('pwd').read()   # 用户当前的绝对路径
-        res = os.popen(I_cmd['func']).read()
-        res_bytes = bytes(res, 'utf-8')
+        list1 = re.split(user_data_base_dir.strip('/'), current_abs_path)  # 用正则模块对路径进行划分
+        res_path = list1[1].strip('/').strip()                  # 去掉服务器的真实路径
+        # res = os.popen(I_cmd['func']).read()
+        res_bytes = bytes(res_path, 'utf-8')
         cmd_dict = {
             'func': I_cmd['func'],
             'res_len': len(res_bytes),  # 结果的长度
-            'path': I_cmd['re_dir'],
+            'path': res_path,
             'run_successfully': True
         }
-        list1 = re.split(user_data_base_dir, current_abs_path)  # 用正则模块对路径进行划分
-        cmd_dict['path'] = list1[1].strip('/')                  # 去掉服务器的真实路径
         self.request.send(self.get_json(cmd_dict).encode('utf-8'))
         comfirm_info = self.request.recv(1024).decode()
         if comfirm_info == 'Ready to recv':
@@ -176,7 +175,7 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
     def cd(self, I_cmd):
         os.chdir(user_data_base_dir + I_cmd['re_dir'])
         current_abs_path = os.popen('pwd').read()     # 当前绝对目录
-        print('current_abs_path: ', current_abs_path)   
+        # print('current_abs_path: ', current_abs_path)   
         cmd_dict = {
             'func': I_cmd['func'],
             'res_len': 0,
@@ -202,7 +201,7 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
                 elif len(list1) == 2:   # 有访问权限
                     cmd_dict['run_successfully'] = True
                     cmd_dict['path'] = list1[1].strip('/')
-                print('after_change_abs_path: ', after_change_abs_path)
+                # print('after_change_abs_path: ', after_change_abs_path)
             except FileNotFoundError as e:      # 输入的目录不正确
                 print('Error')
                 cmd_dict['run_successfully'] = False
@@ -212,7 +211,6 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
         if comfirm_info == 'Ready to recv':
             print('\033[32;1m%s done...\033[0m' % I_cmd['func'])
     
-
     def no_change_cmd(self, I_cmd):
         os.chdir(user_data_base_dir + I_cmd['re_dir'])
         res = os.popen(I_cmd['func']).read()
@@ -228,6 +226,21 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
         if comfirm_info == 'Ready to recv':
             self.request.send(res_bytes)
             print('\033[32;1m%s done...\033[0m' % I_cmd['func'])
+
+    def push(self, I_cmd):
+        ''' 服务器接收文件
+        :param I_cmd:
+        :return:
+        '''
+
+        pass
+
+    def pull(self, I_cmd):
+        ''' 服务器发送文件
+        :param I_cmd:
+        :return:
+        '''
+        pass
 
     def get_md5(self, src_str):
         '''

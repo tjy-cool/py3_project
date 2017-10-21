@@ -110,8 +110,6 @@ class FTP_Client(object):
         res_dict = json.loads(res)
         if res_dict['run_successfully'] == True:
             self.client.send(b'Ready to recv')
-#            res = self.recv_bytes(res_dict['res_len'])
-#             print(res)
             return res_dict['path']
         elif res_dict['run_successfully'] =='Dir False':
             self.client.send(b'Ready to recv')
@@ -126,7 +124,6 @@ class FTP_Client(object):
             print('错误的目录')
             return cmd_dict['re_dir']
 
-
     def no_change_cmd(self, cmd_dict):
         self.client.send(self.get_json(cmd_dict).encode('utf-8'))  # 发送dict的json格式数据到服务器
         res = self.client.recv(1024).decode()
@@ -134,8 +131,29 @@ class FTP_Client(object):
         if res_dict['run_successfully'] == True:
             self.client.send(b'Ready to recv')
             res = self.recv_bytes(res_dict['res_len'])
-            print(res)
+            if cmd_dict['func'].startswith('pwd'):
+                print('/home/'+res)
+            else:
+                print(res)
             return res_dict['path']
+
+    def push(self, I_cmd):
+        '''  客户端发送文件
+        :param I_cmd:
+        :return:
+        '''
+        func = I_cmd['func']
+        if len(func.strip().strip(' ')) == 1:
+            print('push command must be followed by a parameter filename')
+        
+        pass
+
+    def pull(self, I_cmd):
+        '''  客户端接收文件
+        :param I_cmd:
+        :return:
+        '''
+        pass
 
     def get_md5(self, src_str):
         '''
