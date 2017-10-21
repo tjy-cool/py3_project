@@ -303,9 +303,10 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
                 'file_name': I_cmd['file_name'],
                 'file_size': recv_size,
                 'recv_time': time.time(),
-                'recv_file_md5': recv_file_md5
+                'recv_file_md5': recv_file_md5.hexdigest()
             }
-            json.dump(recv_file_dict, recv_info_file)
+            json.dump(recv_file_dict, recv_info_file, indent=4)
+            recv_info_file.seek(0)
         else:
             recv_info_file.close()
             f.close()
