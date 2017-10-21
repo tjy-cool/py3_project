@@ -144,7 +144,7 @@ class FTP_Client(object):
         func = cmd_dict['func']
         if len(func.strip().strip(' ')) == 1:   # 没有接文件名参数
             print('push command must be followed by a parameter filename')
-            return cmd_dict['re_path']      # 直接返回相对家目录的路径
+            return cmd_dict['re_dir']      # 直接返回相对家目录的路径
         else:
             file_name = cmd_dict['func'].split(' ')[1]   # 文件名
             if os.path.isfile(file_name):            # 存在该文件
@@ -156,12 +156,12 @@ class FTP_Client(object):
                 comfirm = self.client.recv(1024).decode()   
                 if comfirm == 'No free disk space':     # 磁盘空间不足
                     print('\033[31;1mYou have no more free disk space\033[0m')
-                    return cmd_dict['re_path']
+                    return cmd_dict['re_dir']
                 elif comfirm == 'Ready to recv':
                     self.send_file(cmd_dict)
                     res_comfirm = self.client.recv(1024).decode()
                     print(res_comfirm)
-                    return cmd_dict['re_path']
+                    return cmd_dict['re_dir']
 
     def pull(self, I_cmd):
         '''  客户端接收文件
