@@ -124,7 +124,27 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
         self.no_change_cmd(I_cmd)
 
     def pwd(self, I_cmd):
-        self.no_change_cmd(I_cmd)
+        ''' pwd 显示当前文件夹的目录绝对目录 ''''
+
+        os.chdir(user_data_base_dir + I_cmd['re_dir'])
+        current_abs_path = os.popen('pwd').read()   # 用户当前的绝对路径
+        res = os.popen(I_cmd['func']).read()
+        res_bytes = bytes(res, 'utf-8')
+        cmd_dict = {
+            'func': I_cmd['func'],
+            'res_len': len(res_bytes),  # 结果的长度
+            'path': I_cmd['re_dir'],
+            'run_successfully': True
+        }
+        list1 = re.split(user_data_base_dir, current_abs_path)  # 用正则模块对路径进行划分
+        cmd_dict['path'] = list1[1].strip('/')                  # 去掉服务器的真实路径
+        self.request.send(self.get_json(cmd_dict).encode('utf-8'))
+        comfirm_info = self.request.recv(1024).decode()
+        if comfirm_info == 'Ready to recv':
+            self.request.send(res_bytes)
+            print('\033[32;1m%s done...\033[0m' % I_cmd['func'])
+
+        # self.no_change_cmd(I_cmd)
 
     def ifconfig(self, I_cmd):
         self.no_change_cmd(I_cmd)
