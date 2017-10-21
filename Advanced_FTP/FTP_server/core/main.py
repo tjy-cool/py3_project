@@ -4,7 +4,7 @@
 
 
 import socketserver, re
-import json, hashlib, os
+import json, hashlib, os, time
 from conf import settings
 
 user_data_base_dir = settings.BASE_DIR+'/db'+'/home/'
@@ -232,6 +232,21 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
         :param I_cmd:
         :return:
         '''
+        user_name = self.loads_from_json(self.user_data)['user_name']
+        os.chdir(user_data_base_dir + user_name)  # 切换到自己的目录
+        user_size_res = os.popen('du -sb').read()    # 
+        user_use_size = user_size_res.strip()[0]         # 自己目录的大小
+        with open(user_info_dir + user_name + '.json', 'r', encoding='utf-8') as f:    # 读取用户数据
+             user_db = json.loads(f.read())
+        tol_user_size = user_db['disk_size']
+        free_disk_size = tol_user_size - user_use_size      # 剩余磁盘大小
+        if free_disk_size <= I_cmd['file_size']:     # 磁盘空间不足
+            self.request.send(b'No free disk space')
+        else:
+            os.chdir(user_data_base_dir + I_cmd['re_dir'])
+            self.request.send(b'Ready to recv')
+        ############## 开始接收文件，md5验证文件的有效性
+            self.recv_file(I_cmd)
 
         pass
 
@@ -269,6 +284,36 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
     #         else:
     #             send_size = len_src_bytes - send_len
     #         self.request.send(send_size)
+
+    def recv_file(self, I_cmd):
+        f = open(I_cmd['file_name'], 'wb')
+        recv_info_file = open(I_cmd['file_name']+'.json', 'wb')
+        recv_file_md5 = hashlib.md5()
+        recv_size = 0
+        while recv_size < I_cmd['file_size']:
+            if I_cmd['file_size']-recv_size > 1024:
+                size = 1024
+            else:
+                size = I_cmd['file_size'] - recv_size
+            recv_file = self.request.recv(size)
+            f.write(recv_file)
+            recv_file_md5.update(recv_file)
+            recv_size += len(recv_file)
+            recv_file_dict = {
+                'file_name': I_cmd['file_name'],
+                'file_size': recv_size,
+                'recv_time': time.time(),
+                'recv_file_md5': recv_file_md5
+            }
+            json.dump(recv_info_file, recv_file_dict)
+        else:
+            recv_info_file.close()
+            f.close()
+            send_from_client_md5 = self.request.recv(1024).decore()
+            if recv_file_md5 == send_from_client_md5:
+                self.request.send(b'File recved completely')
+            else:
+                self.request.send(b'File recved uncompletely')
 
 def run():
     print("server is running...")
