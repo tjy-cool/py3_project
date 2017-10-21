@@ -310,7 +310,7 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
         else:
             recv_info_file.close()
             f.close()
-            send_from_client_md5 = self.request.recv(1024).decore()
+            send_from_client_md5 = self.request.recv(1024).decode()
             if recv_file_md5 == send_from_client_md5:
                 self.request.send(b'File recved completely')
             else:
