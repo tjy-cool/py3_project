@@ -7,7 +7,7 @@
 import os, logging
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-HOST, PORT = 'localhost', 9999
+HOST, PORT = '192.168.1.200', 9999
 
 USER_DATA = {
     'user_name': None,
