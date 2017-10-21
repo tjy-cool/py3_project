@@ -3,5 +3,5 @@
     "is_authenticated": -1,
     "locked": 0,
     "passwd_md5": "e19d5cd5af0378da05f63f891c7467af",
-    "disk_size": 1024000
+    "disk_size": 10240000
 }

@@ -148,7 +148,7 @@ class FTP_Client(object):
         else:
             file_name = cmd_dict['func'].split(' ')[1]   # 文件名
             if os.path.isfile(file_name):            # 存在该文件
-                file_size = os.stat(file_name).st_sizt
+                file_size = os.stat(file_name).st_size
                 cmd_dict['file_name'] = file_name
                 cmd_dict['file_size'] = file_size   # 将文件大小写入到字典中
                 self.client.send(self.get_json(cmd_dict).encode(
@@ -156,11 +156,12 @@ class FTP_Client(object):
                 comfirm = self.client.recv(1024).decode()   
                 if comfirm == 'No free disk space':     # 磁盘空间不足
                     print('\033[31;1mYou have no more free disk space\033[0m')
-                    return cmd_dict
+                    return cmd_dict['re_path']
                 elif comfirm == 'Ready to recv':
                     self.send_file(cmd_dict)
                     res_comfirm = self.client.recv(1024).decode()
                     print(res_comfirm)
+                    return cmd_dict['re_path']
 
     def pull(self, I_cmd):
         '''  客户端接收文件

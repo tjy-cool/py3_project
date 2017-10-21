@@ -235,7 +235,7 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
         user_name = self.loads_from_json(self.user_data)['user_name']
         os.chdir(user_data_base_dir + user_name)  # 切换到自己的目录
         user_size_res = os.popen('du -sb').read()    # 
-        user_use_size = user_size_res.strip()[0]         # 自己目录的大小
+        user_use_size = int(user_size_res.strip()[0])         # 自己目录的大小
         with open(user_info_dir + user_name + '.json', 'r', encoding='utf-8') as f:    # 读取用户数据
              user_db = json.loads(f.read())
         tol_user_size = user_db['disk_size']
