@@ -201,6 +201,7 @@ class FTP_Client(object):
 
     def send_file(self, cmd_dict):
         file_md5 = hashlib.md5()
+        print('ready to send file')
         with open(cmd_dict['file_name'], 'rb') as f:
             send_size = 0
             tol_size = cmd_dict['file_size']
@@ -212,13 +213,13 @@ class FTP_Client(object):
             self.client.send(file_md5.hexdigest().encode('utf-8'))
 
     def show_progress_bar(self, filename, percent):
-        for i in range(50):
-            if i<49:
-                sys.stdout.write('sending file %s: [' % filename + int(percent*50)*'#' + '->')
-                sys.stdout.write((50-i)*' ' + ']'+ str(int(percent)) + '%\r')
-            elif i==49:
-                sys.stdout.white('sending file %s: [' %filename + 52*'#' + ']100%')
-            sys.stdout.flush()
+        # NUM = 50
+        if percent<1:
+            sys.stdout.write('sending file %s: [' % filename + int(percent*50)*'#' + '->')
+            sys.stdout.write((50-int(percent*50))*' ' + ']'+ str(int(percent)) + '%\r')
+        elif percent==1:
+            sys.stdout.write('sending file %s: [' %filename + 52*'#' + ']100%')
+        sys.stdout.flush()
 
 def run():
     print('client is running ...')

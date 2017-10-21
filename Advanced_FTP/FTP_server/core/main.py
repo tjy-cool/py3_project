@@ -305,7 +305,7 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
                 'recv_time': time.time(),
                 'recv_file_md5': recv_file_md5
             }
-            json.dump(recv_info_file, recv_file_dict)
+            json.dump(recv_file_dict, recv_info_file)
         else:
             recv_info_file.close()
             f.close()
