@@ -286,8 +286,8 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
     #         self.request.send(send_size)
 
     def recv_file(self, I_cmd):
-        f = open(I_cmd['file_name'], 'w')
-        recv_info_file = open(I_cmd['file_name']+'.json', 'wb')
+        f = open(I_cmd['file_name'], 'wb')
+        recv_info_file = open(I_cmd['file_name']+'.json', 'w')
         recv_file_md5 = hashlib.md5()
         recv_size = 0
         while recv_size < I_cmd['file_size']:
