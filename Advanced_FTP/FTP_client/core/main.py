@@ -6,6 +6,11 @@ import socket, json, sys, os
 import hashlib
 from conf import settings
 
+__all__ = [run, authentication, 
+        ls, pwd, ifconfig, tree, date, cal, more, 
+        rm, touch, mkdir, cd,
+        push, pull]
+
 class FTP_Client(object):
     def __init__(self, HOST, PORT):
         self.HOST = HOST
@@ -148,7 +153,7 @@ class FTP_Client(object):
         func = cmd_dict['func']
         if len(func.strip().strip(' ')) == 1:   # 没有接文件名参数
             print('push command must be followed by a parameter filename')
-            return cmd_dict['re_dir']      # 直接返回相对家目录的路径
+            # return cmd_dict['re_dir']      # 直接返回相对家目录的路径
         else:
             file_name = cmd_dict['func'].split(' ')[1]   # 文件名
             if os.path.isfile(file_name):            # 存在该文件
@@ -157,15 +162,24 @@ class FTP_Client(object):
                 cmd_dict['file_size'] = file_size   # 将文件大小写入到字典中
                 self.client.send(self.get_json(cmd_dict).encode(
                 'utf-8'))  # 发送dict的json格式数据到服务器
-                comfirm = self.client.recv(1024).decode()   
-                if comfirm == 'No free disk space':     # 磁盘空间不足
+                comfirm = self.client.recv(1024).decode()
+                comfirm_dict = json.dumps(comfirm)      # dumps为dict形式
+                if comfirm_dict['info'] == 'No free disk space':     # 磁盘空间不足
                     print('\033[31;1mYou have no more free disk space\033[0m')
-                    return cmd_dict['re_dir']
-                elif comfirm == 'Ready to recv':
-                    self.send_file(cmd_dict)
+                else:
+                    if comfirm_dict['info'] == 'Ready to recv rest file':      # 开始接收剩余的文件大小
+                        print('上次下载没有完成，本次下载将进行断点续传。。。')
+                        # self.send_file(cmd_dict, comfirm_dict['recved_bytes'])
+                    elif comfirm_dict['info'] == 'Ready to recv full file':
+                        print('本次下载立即开始。。。')
+                        # self.send_file(cmd_dict)
+                    self.send_file(cmd_dict, comfirm_dict)
                     res_comfirm = self.client.recv(1024).decode()
                     print('\n' + res_comfirm)
-                    return cmd_dict['re_dir']
+
+            else:
+                print('File does not found')
+        return cmd_dict['re_dir']       # 直接返回相对家目录的路径
 
     def pull(self, I_cmd):
         '''  客户端接收文件
@@ -203,12 +217,15 @@ class FTP_Client(object):
             res_str = res.decode()
             return res_str
 
-    def send_file(self, cmd_dict):
-        file_md5 = hashlib.md5()
+    def send_file(self, cmd_dict, comfirm_dict):
+        if comfirm_dict['recved_bytes'] == 0:   # 新下载文件
+            file_md5 = hashlib.md5()
+        else:
+            file_md5 = comfirm_dict['recv_file_md5']
         print('ready to send file')
         with open(cmd_dict['file_name'], 'rb') as f:
-            send_size = 0
-            tol_size = cmd_dict['file_size']
+            send_size = comfirm_dict['recved_bytes']    # 已经发送的文件文件大小将从确认信息中获取
+            tol_size = cmd_dict['recved_file_size'] - send_size
             for line in f:
                 self.client.send(line)
                 file_md5.update(line)
