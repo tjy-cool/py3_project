@@ -362,7 +362,7 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
                 recv_file_md5 = hashlib.md5()       # 这里只对剩下的进行md5计算，后续再更改
                 # recv_file_md5 = downloading_info_dict['recv_file_md5']
                 recv_size = downloading_info_dict['recved_file_size']
-        f = open(I_cmd['file_name'], 'ab+')     # 追加模式打开
+        f = open(I_cmd['file_name']+'.downloading', 'ab+')     # 追加模式打开
         recv_info_file = open(I_cmd['file_name'] + '.downloading_info', 'w')
         while recv_size < I_cmd['file_size']:   # 没有完全传完
             if I_cmd['file_size'] - recv_size > 1024:
@@ -381,12 +381,15 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
                 'recv_file_md5': recv_file_md5.hexdigest()
             }
             json.dump(recv_file_dict, recv_info_file, indent=4)
-            recv_info_file.seek(0)
+            recv_info_file.truncate(0)  # 截断操作，不管光标的当前位置，从文件开始位置数0个字符后去掉后面的字符
+            # recv_info_file.seek(0)
         else:
             recv_info_file.close()
             f.close()
             send_from_client_md5 = self.request.recv(1024).decode()
             if recv_file_md5.hexdigest() == send_from_client_md5:   # 通过md5检测文件的完整性
+                os.popen('rm %s' % (I_cmd['file_name'] + '.downloading_info'))
+                os.popen('mv %s %s'% (I_cmd['file_name']+'.downloading', I_cmd['file_name']))
                 self.request.send(b'File recved completely')
             else:
                 self.request.send(b'File recved uncompletely')

@@ -6,10 +6,10 @@ import socket, json, sys, os
 import hashlib
 from conf import settings
 
-__all__ = [run, authentication, 
-        ls, pwd, ifconfig, tree, date, cal, more, 
-        rm, touch, mkdir, cd,
-        push, pull]
+# __all__ = [run, authentication,
+#         ls, pwd, ifconfig, tree, date, cal, more,
+#         rm, touch, mkdir, cd,
+#         push, pull]
 
 class FTP_Client(object):
     def __init__(self, HOST, PORT):
@@ -162,7 +162,8 @@ class FTP_Client(object):
                 cmd_dict['file_size'] = file_size   # 将文件大小写入到字典中
                 self.client.send(self.get_json(cmd_dict).encode('utf-8'))  # 发送dict的json格式数据到服务器
                 comfirm = self.client.recv(1024).decode()
-                comfirm_dict = json.dumps(comfirm)      # dumps为dict形式
+                comfirm_dict = json.loads(comfirm)      # dumps为dict形式
+                print('comfirm_dict: ', comfirm_dict)
                 if comfirm_dict['info'] == 'No free disk space':     # 磁盘空间不足
                     print('\033[31;1mYou have no more free disk space\033[0m')
                 else:
@@ -238,6 +239,7 @@ class FTP_Client(object):
             return res_str
 
     def send_file(self, cmd_dict, comfirm_dict):
+        print('cmd_dict', cmd_dict)
         if comfirm_dict['recved_bytes'] == 0:   # 新下载文件
             file_md5 = hashlib.md5()
         else:
@@ -246,8 +248,8 @@ class FTP_Client(object):
         print('ready to send file')
         with open(cmd_dict['file_name'], 'rb') as f:
             send_size = comfirm_dict['recved_bytes']    # 已经发送的文件文件大小将从确认信息中获取
-            tol_size = cmd_dict['recved_file_size'] - send_size
-            f.seek(cmd_dict['cursor_pos'])      # 将光标移到待续传的位置
+            tol_size = cmd_dict['file_size'] - send_size
+            f.seek(comfirm_dict['cursor_pos'])      # 将光标移到待续传的位置
             for line in f:
                 self.client.send(line)
                 file_md5.update(line)
