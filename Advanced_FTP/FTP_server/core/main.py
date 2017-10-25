@@ -263,6 +263,7 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
             info_dict = {
                 'info': 'No free disk space',
                 'recv_file_md5': None,
+                'cursor_pos': 0,
                 'recved_bytes': 0  # 已经下载的文件大小
             }
             # self.request.send(b'No free disk space')
@@ -278,6 +279,7 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
                     info_dict = {
                         'info': 'Ready to recv rest file',
                         'recv_file_md5': downloading_info_file_dict['recv_file_md5'],
+                        'cursor_pos': downloading_info_file_dict['cursor_pos'], # 光标位置
                         'recved_bytes': downloading_info_file_dict['recved_file_size']    # 已经下载的文件大小
                     }
                 # self.request.send(self.get_json(info_dict).encode('utf-8'))
@@ -285,6 +287,7 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
                 info_dict = {
                     'info': 'Ready to recv full file',
                     'recv_file_md5': None,
+                    'cursor_pos': 0,
                     'recved_bytes': 0  # 已经下载的文件大小
                 }
                 # self.request.send(b'Ready to recv full file')
@@ -297,7 +300,29 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
         :param I_cmd:
         :return:
         '''
-        pass
+        user_name = self.loads_from_json(self.user_data)['user_name']
+        os.chdir(user_data_base_dir + user_name)  # 切换到自己的目录
+
+        file_name = I_cmd['func'].split(' ')[1]  # 文件名
+        if os.path.isfile(file_name):  # 存在该文件
+            file_size = os.stat(file_name).st_size
+            cmd_dict = {
+                'func': I_cmd['func'],
+                'path': I_cmd['re_dir'],
+                'file_size': file_size,
+                'info': 'File not exist'
+            }
+            self.request.send(self.get_json(cmd_dict).encode('utf-8'))
+            cmd_dict = self.request.recv(1024).decode()
+            self.send_file(I_cmd, cmd_dict)
+        else:
+            cmd_dict = {
+                'func': I_cmd['func'],
+                'path': I_cmd['re_dir'],
+                'info': 'File not exist'
+            }
+            self.request.send(self.get_json(cmd_dict).encode('utf-8'))
+
 
     def get_md5(self, src_str):
         '''
@@ -334,7 +359,8 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
         else:           # 断点续传文件
             with open(I_cmd['file_name'] + '.downloading_info', 'r') as f:
                 downloading_info_dict = json.loads(f)
-                recv_file_md5 = downloading_info_dict['recv_file_md5']
+                recv_file_md5 = hashlib.md5()       # 这里只对剩下的进行md5计算，后续再更改
+                # recv_file_md5 = downloading_info_dict['recv_file_md5']
                 recv_size = downloading_info_dict['recved_file_size']
         f = open(I_cmd['file_name'], 'ab+')     # 追加模式打开
         recv_info_file = open(I_cmd['file_name'] + '.downloading_info', 'w')
@@ -351,7 +377,8 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
                 'file_name': I_cmd['file_name'],
                 'recved_file_size': recv_size,
                 'recv_time': time.time(),
-                'recv_file_md5': recv_file_md5
+                'cursor_pos': f.tell(),
+                'recv_file_md5': recv_file_md5.hexdigest()
             }
             json.dump(recv_file_dict, recv_info_file, indent=4)
             recv_info_file.seek(0)
@@ -364,6 +391,8 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
             else:
                 self.request.send(b'File recved uncompletely')
 
+    def send_file(self, I_cmd, cmd_dict):
+        pass
 
 def run():
     print("server is running...")

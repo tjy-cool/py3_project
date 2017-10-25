@@ -160,8 +160,7 @@ class FTP_Client(object):
                 file_size = os.stat(file_name).st_size
                 cmd_dict['file_name'] = file_name
                 cmd_dict['file_size'] = file_size   # 将文件大小写入到字典中
-                self.client.send(self.get_json(cmd_dict).encode(
-                'utf-8'))  # 发送dict的json格式数据到服务器
+                self.client.send(self.get_json(cmd_dict).encode('utf-8'))  # 发送dict的json格式数据到服务器
                 comfirm = self.client.recv(1024).decode()
                 comfirm_dict = json.dumps(comfirm)      # dumps为dict形式
                 if comfirm_dict['info'] == 'No free disk space':     # 磁盘空间不足
@@ -181,12 +180,33 @@ class FTP_Client(object):
                 print('File does not found')
         return cmd_dict['re_dir']       # 直接返回相对家目录的路径
 
-    def pull(self, I_cmd):
+    def pull(self, cmd_dict):
         '''  客户端接收文件
         :param I_cmd:
         :return:
         '''
-        pass
+        func = cmd_dict['func']
+        if len(func.strip().strip(' ')) == 1:   # 没有文件名参数
+            print('push command must be followed by a parameter filename')
+            return cmd_dict['re_dir']      # 直接返回相对家目录的路径
+        else:
+            file_name = cmd_dict['func'].split(' ')[1]  # 文件名
+            downloading_info_filename = file_name + '.downloading_info'  # 没有完成时的信息文件
+            downloading_filename = file_name + '.downloading'  # 没有完成时的文件
+            # 如果源下载源文件和信息文件同时存在时，说明上次没有接收完成， 可以进行断点传送
+            if os.path.isfile(downloading_filename) and  os.path.isfile(downloading_info_filename) :
+                with open(downloading_info_filename, 'r', encoding='utf-8') as f:
+                    downloading_info_file_dict = json.load(f)
+                    cmd_dict['recv_file_md5'] = downloading_info_file_dict['recv_file_md5']
+                    cmd_dict['recved_bytes'] = downloading_info_file_dict['recved_file_size']    # 已经下载的文件大小
+            else:   # 不存在断点续传
+                cmd_dict['recv_file_md5'] = None
+                cmd_dict['recved_bytes'] = 0  # 已经下载的文件大小
+            # 发送dict的json格式数据到服务器
+            self.client.send(self.get_json(cmd_dict).encode('utf-8'))
+            comfirm = self.client.recv(1024).decode()
+            comfirm_dict = json.dumps(comfirm)  # dumps为dict形式
+
 
     def get_md5(self, src_str):
         '''
@@ -221,11 +241,13 @@ class FTP_Client(object):
         if comfirm_dict['recved_bytes'] == 0:   # 新下载文件
             file_md5 = hashlib.md5()
         else:
-            file_md5 = comfirm_dict['recv_file_md5']
+            file_md5 = hashlib.md5()    # 只对后面接收的文件进行md5计算
+            # file_md5 = comfirm_dict['recv_file_md5']
         print('ready to send file')
         with open(cmd_dict['file_name'], 'rb') as f:
             send_size = comfirm_dict['recved_bytes']    # 已经发送的文件文件大小将从确认信息中获取
             tol_size = cmd_dict['recved_file_size'] - send_size
+            f.seek(cmd_dict['cursor_pos'])      # 将光标移到待续传的位置
             for line in f:
                 self.client.send(line)
                 file_md5.update(line)
