@@ -259,12 +259,17 @@ class FTP_Client(object):
 
     def show_progress_bar(self, filename, percent):
         # NUM = 50
-        if percent<1:
-            sys.stdout.write('sending file %s: [' % filename + int(percent*50)*'#' + '->')
-            sys.stdout.write((50-int(percent*50))*' ' + ']'+ str(int(percent)) + '%\r')
-        elif percent==1:
-            sys.stdout.write('sending file %s: [' %filename + 52*'#' + ']100%')
+        sys.stdout.write('sending file %s: [' % filename + int(percent * 50) * '#' + '->'
+                         + (50 - int(percent * 50)) * ' ' + ']' + str(int(percent)) + '%\r')
         sys.stdout.flush()
+        # if percent<1:
+        #     sys.stdout.write('sending file %s: [' % filename + int(percent * 50) * '#' + '->'
+        #                      + (50 - int(percent * 50)) * ' ' + ']' + str(int(percent)) + '%\r')
+        #     # sys.stdout.write()
+        #     sys.stdout.flush()
+        # elif percent==1:
+        #     sys.stdout.write('sending file %s: [' %filename + 52*'#' + ']100%')
+        #     sys.stdout.flush()
 
 def run():
     print('client is running ...')
