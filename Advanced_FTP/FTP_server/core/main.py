@@ -380,6 +380,7 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
                 'cursor_pos': f.tell(),
                 'recv_file_md5': recv_file_md5.hexdigest()
             }
+            recv_info_file.seek(0)
             recv_info_file.truncate(0)  # 截断操作，不管光标的当前位置，从文件开始位置数0个字符后去掉后面的字符
             json.dump(recv_file_dict, recv_info_file, indent=4)
             # recv_info_file.seek(0)
