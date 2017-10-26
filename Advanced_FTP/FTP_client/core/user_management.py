@@ -97,42 +97,57 @@ class FTP_User_management(object):
         }
         self.client.send(self.get_json(query_dict).encode('utf-8'))
         res = self.client.recv(1024).decode()
-        if res == 'OK':
-            self.log_obj.info('query user [%s] successful!' % user_name)
-        elif res == 'Not Found':
+        if res == 'Not Found':
             print('Not found  user [%s]' % user_name)
+        else:
+            print(json.dumps(res))
+            self.log_obj.info('query user [%s] successful!' % user_name)
 
     def alter_user(self, I_cmd):
         ''' 更改用户信息 '''
         change_item = input('0 password   1 locked  2 disk size\ninput change item')
         user_name = input('input username: ')
         alter_dict = {
-            'func': 'query_user',
+            'func': 'alter_user',
             'user_name': user_name
         }
-        if change_item == '0':
-            old_passwd = input('input your old password: ')     # 输入旧密码
+        if change_item == '0':      # 修改密码 password
+            alter_dict['alter_item'] = 'passwd_md5'
+            # old_passwd = input('input your old password: ')     # 输入旧密码
             cnt = 0
             while True:
                 new_passwd1 = input('input your new password:')     # 输入两次新密码
                 new_passwd2 = input('input your new password again:')
                 if new_passwd1 == new_passwd2:
-                    alter_dict['old_passwd_md5'] = self.get_json(old_passwd)
-                    alter_dict['new_passwd_md5'] = self.get_json(new_passwd1)
-
+                    # alter_dict['old_passwd_md5'] = self.get_json(old_passwd)
+                    alter_dict['alter_info'] = self.get_md5(new_passwd1)
                     self.client.send(self.get_json(alter_dict).encode('utf-8'))
                     res = self.client.recv(1024).decode()
                     if res == 'OK':
                         self.log_obj.info('alter user [%s\'s] password successful!' % user_name)
-                    elif res == 'password error':
-                        self.log_obj.info('alter user [%s\'s] password error! Input error old password' % user_name)
-
+                    elif res == 'Not Found':
+                        print('Not found  user [%s]' % user_name)
+                    # elif res == 'password error':
+                    #     self.log_obj.info('alter user [%s\'s] password error! Input error old password' % user_name)
                 else:
                     if cnt == 3:
-                        exit('Too many times attempt.')
+                        print('Too many times attempt.')
+                        break
                     else:
                         cnt += 1
                         print('twice input password is inconsistent! Try again.')
+        if change_item == '1':  # 修改locked
+            pass
+        if change_item == '2':  # 修改 disk size
+            alter_dict['alter_item'] = 'disk_size'
+            new_disk = input('New disk size(b): ')
+            alter_dict['alter_info'] = new_disk.strip()
+            self.client.send(self.get_json(alter_dict).encode('utf-8'))
+            res = self.client.recv(1024).decode()
+            if res == 'OK':
+                self.log_obj.info('alter user [%s\'s] disk size successful!' % user_name)
+            elif res == 'Not Found':
+                print('Not found  user [%s]' % user_name)
 
     def quit(self, I_cmd):
         self.client.close()     # 关闭客户端
