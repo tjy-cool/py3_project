@@ -135,6 +135,7 @@ class FTP_User_management(object):
                         print('twice input password is inconsistent! Try again.')
 
     def quit(self, I_cmd):
+        self.client.close()     # 关闭客户端
         exit('see you next time,,, 88')
 
     def welcome_login(self):

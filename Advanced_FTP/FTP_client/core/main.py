@@ -250,26 +250,46 @@ class FTP_Client(object):
             send_size = comfirm_dict['recved_bytes']    # 已经发送的文件文件大小将从确认信息中获取
             tol_size = cmd_dict['file_size'] - send_size
             f.seek(comfirm_dict['cursor_pos'])      # 将光标移到待续传的位置
+            filename = cmd_dict['file_name']
+            last_send_percent = 0
             for line in f:
                 self.client.send(line)
                 file_md5.update(line)
                 send_size += len(line)
-                self.show_progress_bar(cmd_dict['file_name'], send_size/tol_size)
+                ##### 开始打印进度条
+                this_send_percent = int(send_size/tol_size * 100)
+                if last_send_percent != this_send_percent:
+                    # self.show_progress_bar(cmd_dict['file_name'], send_size/tol_size)
+                    percent = send_size/tol_size
+                    sys.stdout.write('sending file %s: [' % filename + int(percent * 50) * '#' + '->'
+                                     + (50 - int(percent * 50)) * ' ' + ']' + str(int(percent) * 100) + '%\r')
+                    sys.stdout.flush()
+                    last_send_percent = this_send_percent
+                if this_send_percent == 100:
+                    sys.stdout.write('sending file %s: [' % filename + int(percent * 50) * '#' + '##'
+                                     + (50 - int(percent * 50)) * ' ' + ']' + str(int(percent) * 100) + '%\n')
+                    sys.stdout.flush()
+
             self.client.send(file_md5.hexdigest().encode('utf-8'))
 
-    def show_progress_bar(self, filename, percent):
-        # NUM = 50
-        sys.stdout.write('sending file %s: [' % filename + int(percent * 50) * '#' + '->'
-                         + (50 - int(percent * 50)) * ' ' + ']' + str(int(percent)*100) + '%\r')
-        sys.stdout.flush()
-        # if percent<1:
-        #     sys.stdout.write('sending file %s: [' % filename + int(percent * 50) * '#' + '->'
-        #                      + (50 - int(percent * 50)) * ' ' + ']' + str(int(percent)) + '%\r')
-        #     # sys.stdout.write()
-        #     sys.stdout.flush()
-        # elif percent==1:
-        #     sys.stdout.write('sending file %s: [' %filename + 52*'#' + ']100%')
-        #     sys.stdout.flush()
+    # def show_progress_bar(self, filename, percent):
+    #     # NUM = 50
+    #     sys.stdout.write('sending file %s: [' % filename + int(percent * 50) * '#' + '->'
+    #                      + (50 - int(percent * 50)) * ' ' + ']' + str(int(percent)*100) + '%\r')
+    #     sys.stdout.flush()
+    #     if percent<1:
+    #
+    #         sys.stdout.write('sending file %s: [' % filename + int(percent * 50) * '#' + '->'
+    #                          + (50 - int(percent * 50)) * ' ' + ']' + str(int(percent* 100)) + '%\r')
+    #         # sys.stdout.write()
+    #
+    #         sys.stdout.flush()
+    #
+    #     elif percent==1:
+    #         sys.stdout.write('sending file %s: [' %filename + 52*'#' + ']100%')
+    #         # sys.stdout.flush()
+    #         sys.stdout.flush()
+
 
 def run():
     print('client is running ...')

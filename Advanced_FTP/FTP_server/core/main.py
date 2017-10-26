@@ -358,7 +358,7 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
             recv_size = 0
         else:           # 断点续传文件
             with open(I_cmd['file_name'] + '.downloading_info', 'r') as f:
-                downloading_info_dict = json.loads(f)
+                downloading_info_dict = json.load(f)
                 recv_file_md5 = hashlib.md5()       # 这里只对剩下的进行md5计算，后续再更改
                 # recv_file_md5 = downloading_info_dict['recv_file_md5']
                 recv_size = downloading_info_dict['recved_file_size']
