@@ -9,6 +9,7 @@ import json
 import hashlib
 import os
 import time
+import sys
 from conf import settings
 
 user_data_base_dir = settings.BASE_DIR + '/db' + '/home/'
@@ -205,6 +206,10 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
         '''more'''
         self.no_change_cmd(I_cmd)
 
+    def mkdir(self, I_cmd):
+        ''' 创建目录 '''
+        self.no_change_cmd(I_cmd)
+
     def rm(self, I_cmd):
         '''rm 删除'''
         self.no_change_cmd(I_cmd)
@@ -293,10 +298,8 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
         else:
             os.chdir(user_data_base_dir + I_cmd['re_dir'])
             # 没有完成时的信息文件
-            downloading_info_filename = I_cmd['file_name'] + \
-                '.downloading_info'
-            downloading_filename = I_cmd['file_name'] + \
-                '.downloading'      # 没有完成时的文件
+            downloading_info_filename = I_cmd['file_name'] + '.downloading_info'
+            downloading_filename = I_cmd['file_name'] + '.downloading'      # 没有完成时的文件
 
             # 如果源下载源文件和信息文件同时存在时，说明上次没有接收完成， 可以进行断点传送
             if os.path.isfile(downloading_info_filename) and os.path.isfile(downloading_filename):
@@ -338,11 +341,12 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
                 'func': I_cmd['func'],
                 'path': I_cmd['re_dir'],
                 'file_size': file_size,
-                'info': 'File not exist'
+                'info': 'File exist'
             }
             self.request.send(self.get_json(cmd_dict).encode('utf-8'))
-            cmd_dict = self.request.recv(1024).decode()
-            self.send_file(I_cmd, cmd_dict)
+            comfirm_dict_json = self.request.recv(1024).decode()
+            comfirm_dict = json.loads(comfirm_dict_json)
+            self.send_file(comfirm_dict)
         else:
             cmd_dict = {
                 'func': I_cmd['func'],
@@ -405,16 +409,48 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
             f.close()
             send_from_client_md5 = self.request.recv(1024).decode()
             if recv_file_md5.hexdigest() == send_from_client_md5:   # 通过md5检测文件的完整性
-                os.popen('rm %s' % (I_cmd['file_name'] + '.downloading_info'))
-                os.popen('mv %s %s' % (
-                    I_cmd['file_name'] + '.downloading', I_cmd['file_name']))
+                os.popen('del %s' % (I_cmd['file_name'] + '.downloading_info'))     # windows 删除文件 del
+                os.popen('rename %s %s' % (
+                    I_cmd['file_name'] + '.downloading', I_cmd['file_name']))   # windows 重命名文件 rename
+
                 self.request.send(b'File recved completely')
             else:
                 self.request.send(b'File recved uncompletely')
 
-    def send_file(self, I_cmd, cmd_dict):
-        pass
+    def send_file(self, recv_dict):
+        send_size = recv_dict['recved_bytes']
+        file_name = recv_dict['file_name']
+        if  send_size== 0:   # 新下载文件
+            file_md5 = hashlib.md5()
+        else:
+            file_md5 = hashlib.md5()    # 只对后面接收的文件进行md5计算
+            # file_md5 = comfirm_dict['recv_file_md5']
+        print('ready to send file')
+        with open(recv_dict['file_name'], 'rb') as f:
+            file_size = os.stat(file_name).st_size
+            tol_size = file_size  - send_size
 
+            f.seek(recv_dict['cursor_pos'])  # 将光标移到待续传的位置
+            filename = recv_dict['file_name']
+            last_send_percent = 0
+            for line in f:
+                self.request.send(line)
+                file_md5.update(line)
+                send_size += len(line)
+                # 开始打印进度条
+                this_send_percent = int(send_size / tol_size * 100)
+                if last_send_percent != this_send_percent:
+                    # self.show_progress_bar(cmd_dict['file_name'], send_size/tol_size)
+                    percent = send_size / tol_size
+                    sys.stdout.write('sending file %s: [' % filename + int(percent * 50) * '#' + '->'
+                                     + (50 - int(percent * 50)) * ' ' + ']' + str(this_send_percent) + '%\r')
+                    sys.stdout.flush()
+                    last_send_percent = this_send_percent
+                if this_send_percent == 100:
+                    sys.stdout.write('sending file %s: [' % filename + int(percent * 50) * '#' + '##'
+                                     + (50 - int(percent * 50)) * ' ' + ']' + str(int(percent) * 100) + '%\n')
+                    sys.stdout.flush()
+            self.request.send(file_md5.hexdigest().encode('utf-8'))
 
 def run():
     print("server is running...")
