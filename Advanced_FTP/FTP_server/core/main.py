@@ -129,23 +129,18 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
         else:
             self.request.send(b'Not Found')
 
-    def alter_uer(self, Recv_dict):
+    def alter_user(self, Recv_dict):
         ''' 更改用户信息 '''
         user_name = Recv_dict['user_name']
-        print('user_name: ', user_name)
         if os.path.isfile(user_info_dir + user_name + '.json'):
-            print('exist file')
             # os.popen('rm %s' % (user_info_dir + user_name + '.json'))
             with open(user_info_dir + user_name + '.json', 'r') as f:
                 user_info_dict = json.load(f)
                 alter_item = Recv_dict['alter_item']
                 user_info_dict[alter_item] = Recv_dict['alter_info']
-                print('open ok')
             with open(user_info_dir + user_name + '.json', 'w') as f:
                 json.dump(user_info_dict, f)
-                print('write ok')
             self.request.send(b'OK')
-            print('send ok')
         else:
             self.request.send(b'Not Found')
 
