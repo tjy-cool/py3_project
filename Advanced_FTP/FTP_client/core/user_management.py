@@ -107,7 +107,7 @@ class FTP_User_management(object):
         if res == 'Not Found':
             print('Not found  user [%s]' % user_name)
         else:
-            print(json.loads(res, indent=4))
+            print(res)
             self.log_obj.info('query user [%s] successful!' % user_name)
 
     def alter_user(self, I_cmd):

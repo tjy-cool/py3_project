@@ -136,8 +136,8 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
             # os.popen('rm %s' % (user_info_dir + user_name + '.json'))
             with open(user_info_dir + user_name + '.json', 'r') as f:
                 user_info_dict = json.load(f)
-                user_info_dict[Recv_dict['alter_item']
-                               ] = Recv_dict['alter_info']
+                alter_item = Recv_dict['alter_item']
+                user_info_dict[alter_item] = Recv_dict['alter_info']
                 print('open ok')
             with open(user_info_dir + user_name + '.json', 'w') as f:
                 json.dump(user_info_dict, f)
