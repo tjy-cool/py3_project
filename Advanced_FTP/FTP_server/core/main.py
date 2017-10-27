@@ -121,7 +121,7 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
         ''' 查询用户信息 '''
         user_name = Recv_dict['user_name']
         if os.path.isfile(user_info_dir + user_name + '.json'):
-            os.popen('rm %s' % (user_info_dir + user_name + '.json'))
+            # os.popen('rm %s' % (user_info_dir + user_name + '.json'))
             with open(user_info_dir + user_name + '.json', 'r') as f:
                 user_info_dict = json.load(f)
                 del user_info_dict['passwd_md5']    # 删掉用户密码
@@ -309,7 +309,8 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
                 '.downloading'      # 没有完成时的文件
 
             # 如果源下载源文件和信息文件同时存在时，说明上次没有接收完成， 可以进行断点传送
-            if os.path.isfile(downloading_info_filename) and os.path.isfile(downloading_filename):
+            if os.path.isfile(downloading_info_filename) and os.path.isfile(downloading_filename) \
+                    and os.stat(downloading_info_filename).st_size != 0:
                 with open(downloading_info_filename, 'r', encoding='utf-8') as f:
                     downloading_info_file_dict = json.load(f)
                     info_dict = {

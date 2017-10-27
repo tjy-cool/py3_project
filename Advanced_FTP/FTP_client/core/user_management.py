@@ -1,11 +1,18 @@
 #!/usr/bin/env python
-# Funtion:      
+# Funtion:
 # Filename:
 
-import socket, json, os, time, sys, getpass, hashlib
+import socket
+import json
+import os
+import time
+import sys
+import getpass
+import hashlib
 from conf import settings
 from core import logger
-user_data_base_dir = settings.BASE_DIR+'/db'+'/home/'
+user_data_base_dir = settings.BASE_DIR + '/db' + '/home/'
+
 
 class FTP_User_management(object):
     def __init__(self, HOST, PORT, log_obj):
@@ -100,12 +107,13 @@ class FTP_User_management(object):
         if res == 'Not Found':
             print('Not found  user [%s]' % user_name)
         else:
-            print(json.dumps(res))
+            print(json.loads(res, indent=4))
             self.log_obj.info('query user [%s] successful!' % user_name)
 
     def alter_user(self, I_cmd):
         ''' 更改用户信息 '''
-        change_item = input('0 password   1 locked  2 disk size\ninput change item: ')
+        change_item = input(
+            '0 password   1 locked  2 disk size\ninput change item: ')
         user_name = input('input username: ')
         alter_dict = {
             'func': 'alter_user',
@@ -124,7 +132,8 @@ class FTP_User_management(object):
                     self.client.send(self.get_json(alter_dict).encode('utf-8'))
                     res = self.client.recv(1024).decode()
                     if res == 'OK':
-                        self.log_obj.info('alter user [%s\'s] password successful!' % user_name)
+                        self.log_obj.info(
+                            'alter user [%s\'s] password successful!' % user_name)
                     elif res == 'Not Found':
                         print('Not found  user [%s]' % user_name)
                     # elif res == 'password error':
@@ -141,11 +150,15 @@ class FTP_User_management(object):
         if change_item == '2':  # 修改 disk size
             alter_dict['alter_item'] = 'disk_size'
             new_disk = input('New disk size(b): ')
-            alter_dict['alter_info'] = new_disk.strip()
+            alter_dict['alter_info'] = int(new_disk.strip())
+            print('ready to send')
             self.client.send(self.get_json(alter_dict).encode('utf-8'))
+            print('send done...')
             res = self.client.recv(1024).decode()
+            print(res, '-----')
             if res == 'OK':
-                self.log_obj.info('alter user [%s\'s] disk size successful!' % user_name)
+                self.log_obj.info(
+                    'alter user [%s\'s] disk size successful!' % user_name)
             elif res == 'Not Found':
                 print('Not found  user [%s]' % user_name)
 
@@ -160,7 +173,7 @@ class FTP_User_management(object):
             sys.stdout.write('.')
             sys.stdout.flush()
             time.sleep(0.15)
-
+        print('\n')
 
     def print_help(self):
         print('(增加:add_user   删除:del_user   查询:query_user   更改:alter_user   退出:quit)')
@@ -179,9 +192,9 @@ class FTP_User_management(object):
         # 将数据格式化为json格式
         return json.dumps(src)
 
+
 def run():
     print('client is running ...')
     log_obj = logger.logger('admin', True)
     client = FTP_User_management(settings.HOST, settings.PORT, log_obj)
     client.run()
-
