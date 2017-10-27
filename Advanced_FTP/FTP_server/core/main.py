@@ -132,7 +132,9 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
     def alter_uer(self, Recv_dict):
         ''' 更改用户信息 '''
         user_name = Recv_dict['user_name']
+        print('user_name: ', user_name)
         if os.path.isfile(user_info_dir + user_name + '.json'):
+            print('exist file')
             # os.popen('rm %s' % (user_info_dir + user_name + '.json'))
             with open(user_info_dir + user_name + '.json', 'r') as f:
                 user_info_dict = json.load(f)
