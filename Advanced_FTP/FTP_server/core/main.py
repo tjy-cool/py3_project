@@ -93,7 +93,7 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
                         User_data).encode('utf-8'))  # 发送该用户的数据
 
     def add_user(self, Recv_dict):      # add_dict
-        ''' 增加用户 ''''
+        ''' 增加用户 '''
         user_name = Recv_dict['user_name']
         Recv_dict.pop('func')
         if os.path.isfile(user_info_dir + user_name + '.json'):
