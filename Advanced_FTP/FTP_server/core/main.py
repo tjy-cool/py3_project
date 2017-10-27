@@ -93,6 +93,7 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
                         User_data).encode('utf-8'))  # 发送该用户的数据
 
     def add_user(self, Recv_dict):      # add_dict
+        ''' 增加用户 ''''
         user_name = Recv_dict['user_name']
         Recv_dict.pop('func')
         if os.path.isfile(user_info_dir + user_name + '.json'):
@@ -108,6 +109,7 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
             self.request.send(b'OK')
 
     def del_user(self, Recv_dict):
+        ''' 删除用户 '''
         user_name = Recv_dict['user_name']
         if os.path.isfile(user_info_dir + user_name + '.json'):
             os.popen('rm %s' % (user_info_dir + user_name + '.json'))
@@ -116,23 +118,26 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
             self.request.send(b'Not Found')
 
     def query_user(self, Recv_dict):
+        ''' 查询用户信息 '''
         user_name = Recv_dict['user_name']
         if os.path.isfile(user_info_dir + user_name + '.json'):
             os.popen('rm %s' % (user_info_dir + user_name + '.json'))
-            with open(user_info_dir + user_name + '.json', 'rb') as f:
+            with open(user_info_dir + user_name + '.json', 'r') as f:
                 user_info_dict = json.load(f)
                 del user_info_dict['passwd_md5']    # 删掉用户密码
-                self.request.send(user_info_dict)
+                self.request.send(json.dumps(user_info_dict).encode('utf-8'))
         else:
             self.request.send(b'Not Found')
 
     def alter_uer(self, Recv_dict):
+        ''' 更改用户信息 '''
         user_name = Recv_dict['user_name']
         if os.path.isfile(user_info_dir + user_name + '.json'):
             os.popen('rm %s' % (user_info_dir + user_name + '.json'))
-            with open(user_info_dir + user_name + '.json', 'rb') as f:
+            with open(user_info_dir + user_name + '.json', 'r') as f:
                 user_info_dict = json.load(f)
-                user_info_dict[Recv_dict['alter_item']] = Recv_dict['alter_info']
+                user_info_dict[Recv_dict['alter_item']
+                               ] = Recv_dict['alter_info']
             with open(user_info_dir + user_name + '.json', 'w') as f:
                 json.dump(user_info_dict, f)
             self.request.send(b'OK')
@@ -298,8 +303,10 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
         else:
             os.chdir(user_data_base_dir + I_cmd['re_dir'])
             # 没有完成时的信息文件
-            downloading_info_filename = I_cmd['file_name'] + '.downloading_info'
-            downloading_filename = I_cmd['file_name'] + '.downloading'      # 没有完成时的文件
+            downloading_info_filename = I_cmd['file_name'] + \
+                '.downloading_info'
+            downloading_filename = I_cmd['file_name'] + \
+                '.downloading'      # 没有完成时的文件
 
             # 如果源下载源文件和信息文件同时存在时，说明上次没有接收完成， 可以进行断点传送
             if os.path.isfile(downloading_info_filename) and os.path.isfile(downloading_filename):
@@ -409,7 +416,8 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
             f.close()
             send_from_client_md5 = self.request.recv(1024).decode()
             if recv_file_md5.hexdigest() == send_from_client_md5:   # 通过md5检测文件的完整性
-                os.popen('del %s' % (I_cmd['file_name'] + '.downloading_info'))     # windows 删除文件 del
+                # windows 删除文件 del
+                os.popen('del %s' % (I_cmd['file_name'] + '.downloading_info'))
                 os.popen('rename %s %s' % (
                     I_cmd['file_name'] + '.downloading', I_cmd['file_name']))   # windows 重命名文件 rename
 
@@ -420,7 +428,7 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
     def send_file(self, recv_dict):
         send_size = recv_dict['recved_bytes']
         file_name = recv_dict['file_name']
-        if  send_size== 0:   # 新下载文件
+        if send_size == 0:   # 新下载文件
             file_md5 = hashlib.md5()
         else:
             file_md5 = hashlib.md5()    # 只对后面接收的文件进行md5计算
@@ -428,7 +436,7 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
         print('ready to send file')
         with open(recv_dict['file_name'], 'rb') as f:
             file_size = os.stat(file_name).st_size
-            tol_size = file_size  - send_size
+            tol_size = file_size - send_size
 
             f.seek(recv_dict['cursor_pos'])  # 将光标移到待续传的位置
             filename = recv_dict['file_name']
@@ -451,6 +459,7 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
                                      + (50 - int(percent * 50)) * ' ' + ']' + str(int(percent) * 100) + '%\n')
                     sys.stdout.flush()
             self.request.send(file_md5.hexdigest().encode('utf-8'))
+
 
 def run():
     print("server is running...")

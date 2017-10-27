@@ -105,7 +105,7 @@ class FTP_User_management(object):
 
     def alter_user(self, I_cmd):
         ''' 更改用户信息 '''
-        change_item = input('0 password   1 locked  2 disk size\ninput change item')
+        change_item = input('0 password   1 locked  2 disk size\ninput change item: ')
         user_name = input('input username: ')
         alter_dict = {
             'func': 'alter_user',

@@ -26,7 +26,7 @@
     （一）、客户端：
     客户端有两个，一个是管理员登陆的，一个是普通用户登陆的
     1.1 运行FTP_client/bin/ftp_nameage_user.py，可以进行普通用户的增（add_user）、删(del_user)、改(alter_uer)、查(query_user)。
-    比如：增加用户tom，只需要输入：add_user tom
+    比如：增加用户tom，只需要输入：add_user，然后会提示输入用户名
     然后按照提示一步一步完成输入就可以增加tom用户了
 
     1.2 运行FTP_client/bin/ftp_nameage_user.py，可以对用户进行多种操作（常见的linux操作），以及上传下载文件操作，实现的指令有：
