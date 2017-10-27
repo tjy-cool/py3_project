@@ -138,9 +138,12 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
                 user_info_dict = json.load(f)
                 user_info_dict[Recv_dict['alter_item']
                                ] = Recv_dict['alter_info']
+                print('open ok')
             with open(user_info_dir + user_name + '.json', 'w') as f:
                 json.dump(user_info_dict, f)
+                print('write ok')
             self.request.send(b'OK')
+            print('send ok')
         else:
             self.request.send(b'Not Found')
 
