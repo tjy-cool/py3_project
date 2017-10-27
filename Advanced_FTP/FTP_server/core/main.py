@@ -418,9 +418,9 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
             send_from_client_md5 = self.request.recv(1024).decode()
             if recv_file_md5.hexdigest() == send_from_client_md5:   # 通过md5检测文件的完整性
                 # windows 删除文件 del
-                os.popen('del %s' % (I_cmd['file_name'] + '.downloading_info'))
-                os.popen('rename %s %s' % (
-                    I_cmd['file_name'] + '.downloading', I_cmd['file_name']))   # windows 重命名文件 rename
+                os.popen('rm %s' % (I_cmd['file_name'] + '.downloading_info'))
+                # windows 重命名文件 rename
+                os.popen('mv %s %s' % (I_cmd['file_name'] + '.downloading', I_cmd['file_name']))
 
                 self.request.send(b'File recved completely')
             else:
