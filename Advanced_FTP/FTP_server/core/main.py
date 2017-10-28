@@ -354,6 +354,7 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
             self.request.send(self.get_json(cmd_dict).encode('utf-8'))
             comfirm_dict_json = self.request.recv(1024).decode()
             comfirm_dict = json.loads(comfirm_dict_json)
+            print(comfirm_dict_info)
             self.send_file(comfirm_dict)
         else:
             cmd_dict = {
@@ -420,7 +421,8 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
                 # windows 删除文件 del
                 os.popen('rm %s' % (I_cmd['file_name'] + '.downloading_info'))
                 # windows 重命名文件 rename
-                os.popen('mv %s %s' % (I_cmd['file_name'] + '.downloading', I_cmd['file_name']))
+                os.popen('mv %s %s' % (
+                    I_cmd['file_name'] + '.downloading', I_cmd['file_name']))
 
                 self.request.send(b'File recved completely')
             else:

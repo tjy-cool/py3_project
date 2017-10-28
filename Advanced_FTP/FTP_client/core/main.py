@@ -143,7 +143,8 @@ class FTP_Client(object):
             return cmd_dict['re_dir']
 
     def no_change_cmd(self, cmd_dict):
-        self.client.send(self.get_json(cmd_dict).encode('utf-8'))  # 发送dict的json格式数据到服务器
+        self.client.send(self.get_json(cmd_dict).encode(
+            'utf-8'))  # 发送dict的json格式数据到服务器
         res = self.client.recv(1024).decode()
         res_dict = json.loads(res)
         if res_dict['run_successfully'] == True:
@@ -236,6 +237,7 @@ class FTP_Client(object):
                     cmd_dict['recved_bytes'] = 0  # 已经下载的文件大小
                     cmd_dict['cursor_pos'] = 0
                 self.client.send(self.get_json(cmd_dict).encode('utf-8'))
+                print('send info', cmd_dict)
                 comfirm_dict_json = self.client.recv(1024).decode()
                 comfirm_dict = json.loads(comfirm_dict_json)  # dumps为dict形式
                 self.recv_file(comfirm_dict)
@@ -308,13 +310,13 @@ class FTP_Client(object):
         recv_size = cmd_dict['recved_bytes']
         tol_file_size = cmd_dict['tol_file_size']
         recv_file_md5 = hashlib.md5()
-        f = open(cmd_dict['file_name']+'.downloading', 'ab+')
-        recv_info_f = open(cmd_dict['file_name']+'.downloading_info', 'w')
+        f = open(cmd_dict['file_name'] + '.downloading', 'ab+')
+        recv_info_f = open(cmd_dict['file_name'] + '.downloading_info', 'w')
         while recv_size < tol_file_size:
             if tol_file_size - recv_size > 1024:
                 size = 1024
             else:
-                size = cmd_dict['file_size'] -  recv_size
+                size = cmd_dict['file_size'] - recv_size
             recv_file = self.client.recv(size)
             f.write(recv_file)
             recv_file_md5.update(recv_file)
@@ -334,7 +336,8 @@ class FTP_Client(object):
             f.close()
             send_from_server_md5 = self.client.recv(1024).decode()
             if recv_file_md5.hexdigest() == send_from_server_md5:
-                os.popen('rm %s' % (cmd_dict['file_name'] + '.downloading_info'))
+                os.popen('rm %s' %
+                         (cmd_dict['file_name'] + '.downloading_info'))
                 os.popen('mv %s %s' % (cmd_dict['file_name']
                                        + '.downloading', cmd_dict['file_name']))
                 print('\033[32;1mFile recved completely\033[0m')
