@@ -354,7 +354,7 @@ class MyTCPHandlers(socketserver.BaseRequestHandler):
             self.request.send(self.get_json(cmd_dict).encode('utf-8'))
             comfirm_dict_json = self.request.recv(1024).decode()
             comfirm_dict = json.loads(comfirm_dict_json)
-            print(comfirm_dict_info)
+            print(comfirm_dict_json)
             self.send_file(comfirm_dict)
         else:
             cmd_dict = {

@@ -159,7 +159,7 @@ class FTP_Client(object):
     def push(self, cmd_dict):
         '''  客户端发送文件
         :param cmd_dict:
-        :return: 
+        :return:
         '''
         func = cmd_dict['func']
         if len(func.strip().strip(' ')) == 1:   # 没有接文件名参数
@@ -210,7 +210,8 @@ class FTP_Client(object):
             comfirm_dict_json = self.client.recv(1024).decode()
             comfirm_dict = json.loads(comfirm_dict_json)
             if comfirm_dict['info'] == 'File not exist':    # 接收到回信文件不存在
-                print('\033[31;1mServer does not exist file %s' % file_name)
+                print(
+                    '\033[31;1mServer does not exist file %s\033[0m' % file_name)
                 return cmd_dict['re_dir']  # 直接返回相对家目录的路径
             else:   # 接收到回信文件存在
                 tol_file_size = comfirm_dict['file_size']
@@ -232,15 +233,28 @@ class FTP_Client(object):
                         cmd_dict['recv_file_md5'] = None
                         cmd_dict['recved_bytes'] = 0  # 已经下载的文件大小
                         cmd_dict['cursor_pos'] = 0
-                else:   # 不存在断点续传
+                else:   # 不存在断点续传，需要传送完整文件
                     cmd_dict['recv_file_md5'] = None
                     cmd_dict['recved_bytes'] = 0  # 已经下载的文件大小
                     cmd_dict['cursor_pos'] = 0
+
+                '''cmd_dict = {
+                                    'func': 'pull opencv18.mp4', 
+                                    're_dir': 'tjy', 
+                                    'file_name': 'opencv18.mp4', 
+                                    'tol_file_size': 108217992, 
+                                    'recv_file_md5': None, 
+                                    'recved_bytes': 0, 
+                                    'cursor_pos': 0}
+                '''
                 self.client.send(self.get_json(cmd_dict).encode('utf-8'))
+
                 print('send info', cmd_dict)
-                comfirm_dict_json = self.client.recv(1024).decode()
-                comfirm_dict = json.loads(comfirm_dict_json)  # dumps为dict形式
-                self.recv_file(comfirm_dict)
+                # comfirm_dict_json = self.client.recv(1024).decode()
+                # comfirm_dict = json.loads(comfirm_dict_json)  # dumps为dict形式
+
+                self.recv_file(cmd_dict)
+                return cmd_dict['re_dir']       # 直接返回相对家目录的路径
 
     def get_md5(self, src_str):
         '''
@@ -307,16 +321,18 @@ class FTP_Client(object):
 
     def recv_file(self, cmd_dict):
         recv_file_md5 = hashlib.md5()
-        recv_size = cmd_dict['recved_bytes']
+        recv_size = cmd_dict['recved_bytes']    # 已经接收的文件大小（byte）
         tol_file_size = cmd_dict['tol_file_size']
-        recv_file_md5 = hashlib.md5()
-        f = open(cmd_dict['file_name'] + '.downloading', 'ab+')
-        recv_info_f = open(cmd_dict['file_name'] + '.downloading_info', 'w')
+        file_name = cmd_dict['file_name']
+        last_send_percent = 0
+
+        f = open(file_name + '.downloading', 'ab+')
+        recv_info_f = open(file_name + '.downloading_info', 'w')
         while recv_size < tol_file_size:
             if tol_file_size - recv_size > 1024:
                 size = 1024
             else:
-                size = cmd_dict['file_size'] - recv_size
+                size = tol_file_size - recv_size
             recv_file = self.client.recv(size)
             f.write(recv_file)
             recv_file_md5.update(recv_file)
@@ -324,22 +340,35 @@ class FTP_Client(object):
             recv_file_dict = {
                 'file_name': cmd_dict['file_name'],
                 'recved_file_size': recv_size,
-                'recv_time': cmd_dict.time(),
                 'cursor_pos': f.tell(),
                 'recv_file_md5': recv_file_md5.hexdigest()
             }
             recv_info_f.seek(0)
             recv_info_f.truncate(0)
-            json.dump(recv_file_dict, recv_info_f)
+            json.dump(recv_file_dict, recv_info_f, indent=4)
+
+            # 开始打印进度条
+            this_send_percent = int(recv_size / tol_file_size * 100)
+            if last_send_percent != this_send_percent:
+                # self.show_progress_bar(cmd_dict['file_name'], send_size/tol_size)
+                percent = recv_size / tol_file_size
+                sys.stdout.write('recving file %s (%sb): [' % (file_name, recv_size) + int(percent * 50) * '#' + '->'
+                                 + (50 - int(percent * 50)) * ' ' + ']' + str(this_send_percent) + '%\r')
+                sys.stdout.flush()
+                last_send_percent = this_send_percent
+            if this_send_percent == 100:
+                sys.stdout.write('recving file %s ((%sb)): [' % (file_name, recv_size) + int(percent * 50) * '#' + '##'
+                                 + (50 - int(percent * 50)) * ' ' + ']' + str(int(percent) * 100) + '%\n')
+                sys.stdout.flush()
         else:
             recv_info_f.close()
             f.close()
             send_from_server_md5 = self.client.recv(1024).decode()
             if recv_file_md5.hexdigest() == send_from_server_md5:
-                os.popen('rm %s' %
+                os.popen('del %s' %
                          (cmd_dict['file_name'] + '.downloading_info'))
-                os.popen('mv %s %s' % (cmd_dict['file_name']
-                                       + '.downloading', cmd_dict['file_name']))
+                os.popen('rename %s %s' % (cmd_dict['file_name']
+                                           + '.downloading', cmd_dict['file_name']))
                 print('\033[32;1mFile recved completely\033[0m')
             else:
                 print('\033[31;1mFile recved uncompletely\033[0m')
