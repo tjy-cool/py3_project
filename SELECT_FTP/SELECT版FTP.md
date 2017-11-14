@@ -1,3 +1,0 @@
-SELECT版FTP:
-使用SELECT或SELECTORS模块实现并发简单版FTP
-允许多用户并发上传下载文件
