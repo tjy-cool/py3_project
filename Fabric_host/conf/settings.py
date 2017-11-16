@@ -4,8 +4,11 @@
 
 import os
 import logging
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+import json
 
+# xxx\Fabric_host
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+host_json_file_path = BASE_DIR+'\db\host_list.json'
 HOST, PORT = '192.168.1.109', 9999
 
 
@@ -18,3 +21,9 @@ Ch_Format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 # log在文件中显示格式
 Fh_Format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 # log文件存储位置     "%s/log/%s_log" % (settings.BASE_DIR,username)
+
+if __name__ == "__main__":
+    with open(host_json_file_path, 'r', encoding='utf-8') as f:
+        aa = json.load(f)
+        print(aa[0]['host'])
+    # print(host_json_file_path)

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Funtion:      
+# Funtion:
 # Filename:
 
 import socket
@@ -8,6 +8,7 @@ import json
 import hashlib
 import os
 import sys
+
 
 class Client(object):
     def __init__(self, HOST, PORT):
@@ -48,7 +49,7 @@ class Client(object):
 
                 if comfirm_dict['info'] == 'Ready to recv':
                     print('\033[32;1m 本次上传立即开始。。。\033[0m')
-                        # self.send_file(cmd_dict)
+                    # self.send_file(cmd_dict)
                     self.send_file(cmd_dict)
                     # res_comfirm = self.client.recv(1024).decode()
                     # print('\n' + res_comfirm)
@@ -85,7 +86,7 @@ class Client(object):
 
     def send_file(self, cmd_dict):
         file_md5 = hashlib.md5()    # 只对后面接收的文件进行md5计算
-            # file_md5 = comfirm_dict['recv_file_md5']
+        # file_md5 = comfirm_dict['recv_file_md5']
         # print('ready to send file')
         with open(cmd_dict['file_name'], 'rb') as f:
             send_size = 0    # 已经发送的文件文件大小将从确认信息中获取
@@ -177,13 +178,13 @@ class Client(object):
         self.client.close()
         exit()
 
-
     def get_json(self, src):
         # 将数据格式化为json格式
         return json.dumps(src)
 
     # def pull(self, cmd_dict):
     #     pass
+
 
 if __name__ == '__main__':
     client = Client('localhost', 9999)
